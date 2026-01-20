@@ -1,205 +1,196 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Conferência de Patrimônio - SORRI Bauru</title>
+    <title>Património - USF Vila Dutra</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
             body { background: white; padding: 0; }
-            table { width: 100%; border-collapse: collapse; font-size: 9px; }
+            table { width: 100%; border-collapse: collapse; font-size: 8pt; }
             th, td { border: 1px solid #ddd; padding: 4px; text-align: left; }
-            .card-shadow { box-shadow: none !important; border: 1px solid #eee; }
         }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .touch-target { min-height: 44px; }
+        /* Mobile Optimizations */
+        .touch-target { min-height: 48px; }
+        input, select, button { font-size: 16px !important; } /* Previne zoom no iOS */
         .scroll-custom::-webkit-scrollbar { height: 4px; }
         .scroll-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
-    <!-- Tela de Carregamento -->
+    <!-- Loading -->
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p class="text-slate-500 font-medium text-center px-4">Conectando ao Firebase...<br><span class="text-xs text-slate-400 font-normal">Verifique sua conexão se demorar.</span></p>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-slate-400 text-sm font-medium">A carregar sistema...</p>
     </div>
 
-    <!-- Tela de Login -->
+    <!-- View: Login -->
     <div id="login-view" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
-            <div class="flex justify-center mb-6 text-blue-600">
-                <i data-lucide="package" class="w-12 h-12"></i>
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100">
+            <div class="flex justify-center mb-6">
+                <div class="bg-blue-600 p-4 rounded-3xl text-white shadow-lg">
+                    <i data-lucide="shield-check" class="w-10 h-10"></i>
+                </div>
             </div>
-            <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Login Patrimônio</h2>
-            <p class="text-center text-slate-500 mb-8 text-sm">USF Vila Dutra / SORRI Bauru</p>
+            <h2 class="text-2xl font-black text-center text-slate-800 mb-1 text-blue-600">USF Vila Dutra</h2>
+            <p class="text-center text-slate-400 mb-8 text-xs uppercase tracking-widest font-bold">Controlo de Património</p>
             
             <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail</label>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">E-mail</label>
                     <input type="email" id="login-email" required
-                        class="w-full touch-target px-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="seu@email.com">
+                        class="w-full h-14 px-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="nome@email.com">
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Palavra-passe</label>
                     <input type="password" id="login-password" required
-                        class="w-full touch-target px-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        class="w-full h-14 px-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                         placeholder="••••••••">
                 </div>
-                <div id="login-error" class="hidden text-red-600 text-xs font-medium bg-red-50 p-4 rounded-xl border border-red-100">
-                    <p id="error-msg-text"></p>
-                    <p id="error-code-text" class="mt-1 opacity-60 font-mono text-[10px]"></p>
+                
+                <div id="login-error" class="hidden bg-red-50 p-4 rounded-2xl border border-red-100">
+                    <p id="error-msg-text" class="text-red-700 text-xs font-bold leading-tight"></p>
+                    <p id="error-code-text" class="text-red-400 text-[9px] mt-1 font-mono"></p>
                 </div>
+
                 <button type="submit" id="btn-login-submit"
-                    class="w-full bg-blue-600 text-white touch-target rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                    ACESSAR SISTEMA
+                    class="w-full h-14 bg-blue-600 text-white rounded-2xl font-black shadow-xl hover:bg-blue-700 active:scale-95 transition-all">
+                    ENTRAR
                 </button>
             </form>
-            
-            <div class="mt-6 p-4 bg-slate-50 rounded-xl text-[11px] text-slate-500 border border-slate-100">
-                <p class="font-bold mb-1 uppercase tracking-wider">Atenção Coordenador:</p>
-                <ul class="list-disc pl-4 space-y-1">
-                    <li>O e-mail deve estar cadastrado na aba <b>Users</b> do Firebase.</li>
-                    <li>O provedor <b>E-mail/Senha</b> deve estar <b>Ativado</b>.</li>
-                </ul>
-            </div>
         </div>
     </div>
 
-    <!-- App Principal -->
+    <!-- View: App -->
     <div id="app-view" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white border-b sticky top-0 z-50 no-print">
+        <header class="bg-white border-b sticky top-0 z-50 no-print shadow-sm">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="shield-check" class="text-blue-600 w-6 h-6"></i>
-                    <h1 class="font-bold text-slate-800 hidden sm:block uppercase tracking-tight">Patrimônio Vila Dutra</h1>
+                    <span class="bg-blue-600 text-white p-1.5 rounded-lg"><i data-lucide="clipboard-list" class="w-5 h-5"></i></span>
+                    <h1 class="font-black text-slate-800 tracking-tighter text-lg">PATRIMÓNIO</h1>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button onclick="downloadCSVTemplate()" title="Baixar Planilha Modelo" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                <div class="flex items-center gap-1">
+                    <button onclick="downloadCSVTemplate()" title="Descarregar Modelo" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors">
                         <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                     </button>
-                    <label title="Importar em Massa" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                    <label title="Importar CSV" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer">
                         <i data-lucide="upload-cloud" class="w-5 h-5"></i>
                         <input type="file" id="csv-upload" class="hidden" accept=".csv">
                     </label>
-                    <div class="h-6 w-px bg-slate-200 mx-1"></div>
-                    <button onclick="window.print()" class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                    <button onclick="window.print()" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl">
                         <i data-lucide="printer" class="w-5 h-5"></i>
                     </button>
-                    <button id="logout-btn" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <button id="logout-btn" class="p-2 text-red-500 hover:bg-red-50 rounded-xl ml-1">
+                        <i data-lucide="power" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-24">
-            <div id="permission-warning" class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm">
-                <p class="font-bold mb-1">Aviso de Permissão Firestore:</p>
-                <p>O Firebase recusou o acesso aos dados. Verifique se as Regras do Firestore permitem leitura/escrita para usuários autenticados.</p>
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 pb-24">
+            <!-- Aviso de Erro de Permissão -->
+            <div id="permission-warning" class="hidden mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-2xl text-sm font-bold flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="alert-triangle"></i> ERRO DE PERMISSÃO NO FIRESTORE
+                </div>
+                <p class="text-[10px] font-normal">Gustavo, você precisa ir no Console do Firebase > Firestore > Rules e liberar o acesso para usuários logados.</p>
             </div>
 
-            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
+            <!-- Search & Filter -->
+            <div class="mb-6 space-y-3 no-print">
                 <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-                    <input type="text" id="search-input" placeholder="Buscar patrimônio ou descrição..."
-                        class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <input type="text" id="search-input" placeholder="Pesquisar por nº ou descrição..."
+                        class="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
                 </div>
                 <div class="relative">
-                    <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-                    <select id="filter-local" 
-                        class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none shadow-sm">
-                        <option value="Todos">Todos os Locais</option>
+                    <i data-lucide="map-pin" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <select id="filter-local" class="w-full h-12 pl-12 pr-10 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none shadow-sm">
+                        <option value="Todos">Todos os Setores</option>
                     </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
                 </div>
             </div>
 
-            <div id="import-status" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm flex items-center gap-2">
-                <div class="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-                Importando planilha... aguarde.
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow">
+            <!-- Table -->
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto scroll-custom">
-                    <table class="w-full text-left min-w-[1000px]">
+                    <table class="w-full text-left min-w-[1100px]">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
-                                <th class="px-4 py-4 border-b">Patrimônio</th>
-                                <th class="px-4 py-4 border-b">Descrição</th>
-                                <th class="px-4 py-4 border-b">Conservação</th>
-                                <th class="px-4 py-4 border-b text-center" colspan="2">Localizada?</th>
-                                <th class="px-4 py-4 border-b">Local</th>
-                                <th class="px-4 py-4 border-b">Observação</th>
-                                <th class="px-4 py-4 border-b text-right no-print">Ações</th>
+                            <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b">
+                                <th class="px-6 py-4">Património</th>
+                                <th class="px-6 py-4">Descrição</th>
+                                <th class="px-6 py-4">Conservação</th>
+                                <th class="px-4 py-4 text-center" colspan="2">Localizada?</th>
+                                <th class="px-6 py-4">Local</th>
+                                <th class="px-6 py-4">Observação</th>
+                                <th class="px-6 py-4 no-print"></th>
                             </tr>
                             <tr class="bg-slate-50 text-[9px] text-center no-print">
                                 <th colspan="3"></th>
-                                <th class="px-1 border-b pb-2">SIM</th>
-                                <th class="px-1 border-b pb-2">NÃO</th>
+                                <th class="px-1 border-b text-blue-600 pb-2">SIM</th>
+                                <th class="px-1 border-b text-red-600 pb-2">NÃO</th>
                                 <th colspan="3"></th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table-body" class="divide-y divide-slate-100 text-sm">
-                            <tr>
-                                <td colspan="8" class="px-4 py-12 text-center text-slate-400 italic">Carregando lista de bens...</td>
-                            </tr>
+                        <tbody id="inventory-table-body" class="divide-y divide-slate-50 text-sm">
+                            <tr><td colspan="8" class="px-6 py-12 text-center text-slate-300 italic">A carregar dados do banco...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+            
+            <div id="counter" class="mt-4 px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest"></div>
         </main>
 
-        <button id="btn-open-modal" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-all no-print z-40">
-            <i data-lucide="plus" class="w-6 h-6"></i>
+        <!-- Fab -->
+        <button id="btn-open-modal" class="fixed bottom-6 right-6 w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-all no-print z-40">
+            <i data-lucide="plus" class="w-8 h-8"></i>
         </button>
     </div>
 
-    <!-- Modal Novo Item -->
-    <div id="modal-new" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+    <!-- Modal: New Item -->
+    <div id="modal-new" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
             <div class="p-6 border-b flex items-center justify-between">
-                <h3 class="text-xl font-bold text-slate-800">Novo Patrimônio</h3>
-                <button id="btn-close-modal" class="text-slate-400 p-2"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <h3 class="text-xl font-black text-slate-800 tracking-tight">ADICIONAR BEM</h3>
+                <button id="btn-close-modal" class="text-slate-300 hover:text-slate-600 p-2"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <form id="new-item-form" class="p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nº Patrimônio</label>
-                        <input type="number" id="new-patrimonio" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nº Inventário</label>
+                        <input type="number" id="new-patrimonio" required class="w-full h-12 px-4 bg-slate-50 border rounded-xl outline-none">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Local</label>
-                        <input type="text" id="new-local" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none" placeholder="Ex: Recepção">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Local</label>
+                        <input type="text" id="new-local" required class="w-full h-12 px-4 bg-slate-50 border rounded-xl outline-none" placeholder="Ex: Recepção">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                    <input type="text" id="new-descricao" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Descrição</label>
+                    <input type="text" id="new-descricao" required class="w-full h-12 px-4 bg-slate-50 border rounded-xl outline-none">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Conservação</label>
-                    <select id="new-conservacao" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Estado</label>
+                    <select id="new-conservacao" class="w-full h-12 px-4 bg-slate-50 border rounded-xl outline-none">
                         <option value="BOM">BOM</option>
                         <option value="REGULAR">REGULAR</option>
                         <option value="PRECISA DE REPARO">PRECISA DE REPARO</option>
                         <option value="INSERVÍVEL">INSERVÍVEL</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Observação</label>
-                    <input type="text" id="new-observacao" class="w-full p-3 bg-slate-50 border rounded-xl outline-none" placeholder="Detalhes (opcional)">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Observação</label>
+                    <input type="text" id="new-observacao" class="w-full h-12 px-4 bg-slate-50 border rounded-xl outline-none" placeholder="Opcional">
                 </div>
-                <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">SALVAR PATRIMÔNIO</button>
+                <button type="submit" class="w-full h-14 bg-blue-600 text-white rounded-2xl font-black shadow-lg active:scale-95 transition-all mt-2 uppercase tracking-widest">Salvar no Sistema</button>
             </form>
         </div>
     </div>
@@ -209,30 +200,31 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Configuração do Projeto patrimonio-5640e
         const firebaseConfig = {
-          apiKey: "AIzaSyB_0y0KHllFB32tv2OyeUw8EQSFYxMMudw",
-          authDomain: "chamado-68ac3.firebaseapp.com",
-          projectId: "chamado-68ac3",
-          storageBucket: "chamado-68ac3.firebasestorage.app",
-          messagingSenderId: "1001100519035",
-          appId: "1:1001100519035:web:bcc34bf3025326d6f224de",
-          measurementId: "G-LC4EJHLR9L"
+          apiKey: "AIzaSyCO6JXHWm-ewHBhaI1Y6VYV6_PDggBWjHc",
+          authDomain: "patrimonio-5640e.firebaseapp.com",
+          projectId: "patrimonio-5640e",
+          storageBucket: "patrimonio-5640e.firebasestorage.app",
+          messagingSenderId: "607118852292",
+          appId: "1:607118852292:web:afef03063555a8dadec991",
+          measurementId: "G-ERNTCB7YMQ"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : "patrimonio-sorri-bauru";
-        const collPath = ['artifacts', appId, 'public', 'data', 'patrimonio'];
+        // Caminho dos dados - Deve bater com as regras do Firestore
+        const appIdString = "patrimonio-sorri-bauru";
+        const collPath = ['artifacts', appIdString, 'public', 'data', 'patrimonio'];
 
         let currentUser = null;
         let inventoryData = [];
         let unsubscribeStore = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 document.getElementById('loading-screen').classList.add('hidden');
@@ -244,14 +236,6 @@
                     showView('login-view');
                 }
             });
-
-            // Fallback para ambiente de teste se necessário
-            const initAuthFallback = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try { await signInWithCustomToken(auth, __initial_auth_token); } catch(e){}
-                }
-            };
-            initAuthFallback();
         });
 
         function showView(viewId) {
@@ -260,37 +244,33 @@
             document.getElementById(viewId).classList.remove('hidden');
         }
 
-        // Login com Tratamento de Erro Detalhado
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
+            const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-password').value;
             const btn = document.getElementById('btn-login-submit');
             const errorDiv = document.getElementById('login-error');
-            const errorText = document.getElementById('error-msg-text');
+            const errorMsg = document.getElementById('error-msg-text');
             const errorCode = document.getElementById('error-code-text');
             
             try {
                 btn.disabled = true;
-                btn.innerText = "VERIFICANDO...";
+                btn.innerText = "A VALIDAR...";
                 errorDiv.classList.add('hidden');
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch (error) {
                 errorDiv.classList.remove('hidden');
-                errorCode.innerText = "Código do erro: " + error.code;
+                errorCode.innerText = "CÓDIGO: " + error.code;
                 
                 if (error.code === 'auth/operation-not-allowed') {
-                    errorText.innerText = "O login por E-mail/Senha ainda não foi ativado no Console do Firebase.";
-                } else if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                    errorText.innerText = "E-mail não cadastrado ou senha incorreta.";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorText.innerText = "O formato do e-mail é inválido.";
+                    errorMsg.innerText = "LOGIN BLOQUEADO: Ative 'E-mail/Senha' no Console do Firebase > Authentication.";
+                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
+                    errorMsg.innerText = "Utilizador ou senha incorretos.";
                 } else {
-                    errorText.innerText = "Erro ao entrar: " + error.message;
+                    errorMsg.innerText = "Erro ao entrar: " + error.message;
                 }
-                
                 btn.disabled = false;
-                btn.innerText = "ACESSAR SISTEMA";
+                btn.innerText = "ENTRAR";
             }
         };
 
@@ -299,15 +279,18 @@
         function startListening() {
             if (!currentUser) return;
             const q = query(collection(db, ...collPath));
+            
             unsubscribeStore = onSnapshot(q, (snapshot) => {
                 inventoryData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 document.getElementById('permission-warning').classList.add('hidden');
                 updateUI();
                 updateFilterOptions();
             }, (error) => {
-                console.error(error);
+                console.error("Firestore Error:", error);
                 if (error.code === 'permission-denied') {
                     document.getElementById('permission-warning').classList.remove('hidden');
+                    const tbody = document.getElementById('inventory-table-body');
+                    tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-12 text-center text-red-500 font-bold uppercase tracking-tighter">Erro de Permissão: Acesse o Console do Firebase e libere as Regras do Firestore.</td></tr>`;
                 }
             });
         }
@@ -324,22 +307,23 @@
                 return matchSearch && matchLocal;
             });
 
-            filtered.sort((a, b) => a.patrimonio - b.patrimonio);
+            filtered.sort((a, b) => (Number(a.patrimonio) || 0) - (Number(b.patrimonio) || 0));
+            document.getElementById('counter').innerText = `${filtered.length} ITENS REGISTADOS`;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">Nenhum patrimônio listado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-16 text-center text-slate-300 italic tracking-widest uppercase text-[10px]">Sem registos para mostrar</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-4 py-4 font-bold text-blue-700">${item.patrimonio}</td>
-                    <td class="px-4 py-4">
-                        <input type="text" class="bg-transparent border-none focus:ring-1 focus:ring-blue-100 rounded w-full p-1" 
+                <tr class="hover:bg-blue-50/30 transition-colors border-b border-slate-50 last:border-0">
+                    <td class="px-6 py-4 font-black text-blue-600">${item.patrimonio}</td>
+                    <td class="px-6 py-4">
+                        <input type="text" class="w-full bg-transparent border-none p-1 rounded focus:bg-white focus:ring-2 focus:ring-blue-100" 
                                value="${item.descricao || ''}" onblur="window.updateField('${item.id}', 'descricao', this.value)">
                     </td>
-                    <td class="px-4 py-4">
-                        <select class="bg-transparent border-none text-xs p-0 focus:ring-0 cursor-pointer" 
+                    <td class="px-6 py-4">
+                        <select class="bg-transparent border-none text-[10px] font-black p-0 focus:ring-0 uppercase cursor-pointer" 
                                 onchange="window.updateField('${item.id}', 'conservacao', this.value)">
                             <option value="BOM" ${item.conservacao === 'BOM' ? 'selected' : ''}>BOM</option>
                             <option value="REGULAR" ${item.conservacao === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
@@ -347,26 +331,26 @@
                             <option value="INSERVÍVEL" ${item.conservacao === 'INSERVÍVEL' ? 'selected' : ''}>INSERVÍVEL</option>
                         </select>
                     </td>
-                    <td class="px-2 py-4 text-center">
+                    <td class="px-1 py-4 text-center">
                         <input type="checkbox" ${item.localizada ? 'checked' : ''} 
-                               class="w-5 h-5 rounded border-slate-300 text-blue-600"
+                               class="w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500"
                                onclick="window.updateField('${item.id}', 'localizada', true)">
                     </td>
-                    <td class="px-2 py-4 text-center">
+                    <td class="px-1 py-4 text-center">
                         <input type="checkbox" ${item.localizada === false ? 'checked' : ''} 
-                               class="w-5 h-5 rounded border-slate-300 text-red-600"
+                               class="w-5 h-5 rounded-lg border-slate-300 text-red-500 focus:ring-red-500"
                                onclick="window.updateField('${item.id}', 'localizada', false)">
                     </td>
-                    <td class="px-4 py-4">
-                        <input type="text" class="bg-transparent border-none focus:ring-1 focus:ring-blue-100 rounded w-full p-1" 
+                    <td class="px-6 py-4">
+                        <input type="text" class="w-full bg-transparent border-none p-1 rounded focus:bg-white focus:ring-2 focus:ring-blue-100" 
                                value="${item.local || ''}" onblur="window.updateField('${item.id}', 'local', this.value)">
                     </td>
-                    <td class="px-4 py-4">
-                        <input type="text" class="bg-transparent border-none focus:ring-1 focus:ring-blue-100 rounded w-full p-1 italic text-slate-500" 
-                               placeholder="..." value="${item.observacao || ''}" onblur="window.updateField('${item.id}', 'observacao', this.value)">
+                    <td class="px-6 py-4">
+                        <input type="text" class="w-full bg-transparent border-none p-1 rounded focus:bg-white focus:ring-2 focus:ring-blue-100 italic text-slate-400 text-xs" 
+                               placeholder="Observações..." value="${item.observacao || ''}" onblur="window.updateField('${item.id}', 'observacao', this.value)">
                     </td>
-                    <td class="px-4 py-4 text-right no-print">
-                        <button onclick="window.removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1">
+                    <td class="px-6 py-4 text-right no-print">
+                        <button onclick="window.removeItem('${item.id}')" class="text-slate-200 hover:text-red-500 transition-colors">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </td>
@@ -379,7 +363,7 @@
             const select = document.getElementById('filter-local');
             const locals = [...new Set(inventoryData.map(i => i.local).filter(Boolean))].sort();
             const currentVal = select.value;
-            select.innerHTML = '<option value="Todos">Todos os Locais</option>' + 
+            select.innerHTML = '<option value="Todos">Todos os Setores</option>' + 
                 locals.map(loc => `<option value="${loc}" ${loc === currentVal ? 'selected' : ''}>${loc}</option>`).join('');
         }
 
@@ -388,19 +372,19 @@
             const docRef = doc(db, ...collPath, id);
             try {
                 await updateDoc(docRef, { [field]: value });
-            } catch (e) { console.error("Update error:", e); }
+            } catch (e) { console.error(e); }
         };
 
         window.removeItem = async (id) => {
-            if (!currentUser || !confirm("Remover este item do patrimônio?")) return;
+            if (!currentUser || !confirm("Deseja eliminar este registo?")) return;
             const docRef = doc(db, ...collPath, id);
             try {
                 await deleteDoc(docRef);
-            } catch (e) { console.error("Delete error:", e); }
+            } catch (e) { console.error(e); }
         };
 
         window.downloadCSVTemplate = () => {
-            const csvContent = "patrimonio;descricao;local;conservacao;observacao\n1001;Cadeira Giratória;Recepção;BOM;-\n1002;Mesa de Escritório;Consultório 01;REGULAR;Falta gaveta";
+            const csvContent = "patrimonio;descricao;local;conservacao;observacao\n101;Monitor Dell;TI;BOM;-\n102;Cadeira recepção;Sala 01;REGULAR;Pé solto";
             const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -409,42 +393,39 @@
             link.click();
         };
 
-        const csvInput = document.getElementById('csv-upload');
-        if (csvInput) {
-            csvInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file || !currentUser) return;
-                const reader = new FileReader();
-                const status = document.getElementById('import-status');
-                status.classList.remove('hidden');
-                reader.onload = async function(event) {
-                    const text = event.target.result;
-                    const rows = text.split(/\r?\n/);
-                    for (let i = 1; i < rows.length; i++) {
-                        const row = rows[i].trim();
-                        if (!row) continue;
-                        const columns = row.includes(';') ? row.split(';') : row.split(',');
-                        if (columns.length >= 4) {
-                            try {
-                                await addDoc(collection(db, ...collPath), {
-                                    patrimonio: columns[0].trim(),
-                                    descricao: columns[1].trim(),
-                                    local: columns[2].trim(),
-                                    conservacao: (columns[3] || 'BOM').trim().toUpperCase(),
-                                    observacao: columns[4] ? columns[4].trim() : '',
-                                    localizada: true,
-                                    createdAt: new Date().toISOString()
-                                });
-                            } catch (err) { console.error("Linha " + i, err); }
-                        }
+        document.getElementById('csv-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file || !currentUser) return;
+            const reader = new FileReader();
+            const status = document.getElementById('loading-screen');
+            status.classList.remove('hidden');
+            reader.onload = async function(event) {
+                const text = event.target.result;
+                const rows = text.split(/\r?\n/);
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i].trim();
+                    if (!row) continue;
+                    const columns = row.includes(';') ? row.split(';') : row.split(',');
+                    if (columns.length >= 4) {
+                        try {
+                            await addDoc(collection(db, ...collPath), {
+                                patrimonio: columns[0].trim(),
+                                descricao: columns[1].trim(),
+                                local: columns[2].trim(),
+                                conservacao: (columns[3] || 'BOM').trim().toUpperCase(),
+                                observacao: columns[4] ? columns[4].trim() : '',
+                                localizada: true,
+                                createdAt: new Date().toISOString()
+                            });
+                        } catch (err) { console.error(err); }
                     }
-                    status.classList.add('hidden');
-                    alert("Importação concluída!");
-                    e.target.value = '';
-                };
-                reader.readAsText(file);
-            });
-        }
+                }
+                status.classList.add('hidden');
+                alert("Importação concluída!");
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        });
 
         const modal = document.getElementById('modal-new');
         document.getElementById('btn-open-modal').onclick = () => modal.classList.remove('hidden');
@@ -466,7 +447,7 @@
                 await addDoc(collection(db, ...collPath), payload);
                 modal.classList.add('hidden');
                 e.target.reset();
-            } catch (e) { alert("Erro ao salvar: " + e.message); }
+            } catch (e) { alert("Erro: " + e.message); }
         };
 
         document.getElementById('search-input').oninput = updateUI;
