@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Conferência de Patrimônio - SORRI Bauru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; padding: 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; }
+            th, td { border: 1px solid #ddd; padding: 4px; text-align: left; }
+            .card-shadow { box-shadow: none !important; border: 1px solid #eee; }
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .touch-target { min-height: 44px; }
+        .scroll-custom::-webkit-scrollbar { height: 4px; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
+    <!-- Tela de Carregamento -->
+    <div id="loading-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-slate-500 font-medium">Carregando sistema...</p>
+    </div>
+
+    <!-- Tela de Login -->
+    <div id="login-view" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+            <div class="flex justify-center mb-6 text-blue-600">
+                <i data-lucide="package" class="w-12 h-12"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Login Patrimônio</h2>
+            <p class="text-center text-slate-500 mb-8 text-sm">USF Vila Dutra / SORRI Bauru</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail</label>
+                    <input type="email" id="login-email" required
+                        class="w-full touch-target px-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label>
+                    <input type="password" id="login-password" required
+                        class="w-full touch-target px-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="••••••••">
+                </div>
+                <div id="login-error" class="hidden text-red-500 text-xs font-medium bg-red-50 p-3 rounded-lg"></div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white touch-target rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                    ACESSAR SISTEMA
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Principal -->
+    <div id="app-view" class="hidden min-h-screen flex flex-col">
+        <header class="bg-white border-b sticky top-0 z-50 no-print">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="shield-check" class="text-blue-600 w-6 h-6"></i>
+                    <h1 class="font-bold text-slate-800 hidden sm:block">PATRIMÔNIO</h1>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Botões de Bulk -->
+                    <button onclick="downloadCSVTemplate()" title="Baixar Planilha Modelo" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                    </button>
+                    <label title="Importar em Massa" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                        <input type="file" id="csv-upload" class="hidden" accept=".csv">
+                    </label>
+                    <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                    <button onclick="window.print()" class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                        <i data-lucide="printer" class="w-5 h-5"></i>
+                    </button>
+                    <button id="logout-btn" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-24">
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <input type="text" id="search-input" placeholder="Buscar patrimônio ou descrição..."
+                        class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                </div>
+                <div class="relative">
+                    <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <select id="filter-local" 
+                        class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none shadow-sm">
+                        <option value="Todos">Todos os Locais</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="import-status" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm flex items-center gap-2">
+                <div class="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                Processando importação... aguarde.
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow">
+                <div class="overflow-x-auto scroll-custom">
+                    <table class="w-full text-left min-w-[800px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
+                                <th class="px-4 py-4 border-b">Patrimônio</th>
+                                <th class="px-4 py-4 border-b">Descrição</th>
+                                <th class="px-4 py-4 border-b">Conservação</th>
+                                <th class="px-4 py-4 border-b text-center" colspan="2">Bem Localizada?</th>
+                                <th class="px-4 py-4 border-b">Local</th>
+                                <th class="px-4 py-4 border-b text-right no-print">Ações</th>
+                            </tr>
+                            <tr class="bg-slate-50 text-[9px] text-center no-print">
+                                <th colspan="3"></th>
+                                <th class="px-1 border-b pb-2">SIM</th>
+                                <th class="px-1 border-b pb-2">NÃO</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <button id="btn-open-modal" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-all no-print z-40">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <!-- Modal Novo Item -->
+    <div id="modal-new" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-bold text-slate-800">Novo Patrimônio</h3>
+                <button id="btn-close-modal" class="text-slate-400 p-2"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="new-item-form" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nº Patrimônio</label>
+                        <input type="number" id="new-patrimonio" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Local</label>
+                        <input type="text" id="new-local" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none" placeholder="Ex: Consultório 1">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                    <input type="text" id="new-descricao" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Conservação</label>
+                    <select id="new-conservacao" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                        <option value="BOM">BOM</option>
+                        <option value="REGULAR">REGULAR</option>
+                        <option value="PRECISA DE REPARO">PRECISA DE REPARO</option>
+                        <option value="INSERVÍVEL">INSERVÍVEL</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">SALVAR</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCO6JXHWm-ewHBhaI1Y6VYV6_PDggBWjHc",
+            authDomain: "patrimonio-5640e.firebaseapp.com",
+            projectId: "patrimonio-5640e",
+            storageBucket: "patrimonio-5640e.firebasestorage.app",
+            messagingSenderId: "607118852292",
+            appId: "1:607118852292:web:afef03063555a8dadec991",
+            measurementId: "G-ERNTCB7YMQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "patrimonio-sorri-bauru";
+        const collPath = `artifacts/${appId}/public/data/patrimonio`;
+
+        let currentUser = null;
+        let inventoryData = [];
+
+        window.onload = async () => {
+            lucide.createIcons();
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                }
+            } catch (e) { console.error(e); }
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                document.getElementById('loading-screen').classList.add('hidden');
+                if (user) {
+                    showView('app-view');
+                    setupRealtimeData();
+                } else {
+                    showView('login-view');
+                }
+            });
+        };
+
+        function showView(viewId) {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('app-view').classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            try {
+                errorDiv.classList.add('hidden');
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (error) {
+                errorDiv.innerText = "Erro ao entrar: E-mail ou senha incorretos.";
+                errorDiv.classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
+
+        function setupRealtimeData() {
+            if (!currentUser) return;
+            const q = query(collection(db, ...collPath.split('/')));
+            onSnapshot(q, (snapshot) => {
+                inventoryData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateUI();
+                updateFilterOptions();
+            }, (error) => console.error(error));
+        }
+
+        function updateUI() {
+            const tbody = document.getElementById('inventory-table-body');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const filterLocal = document.getElementById('filter-local').value;
+
+            const filtered = inventoryData.filter(item => {
+                const matchSearch = (item.descricao || "").toLowerCase().includes(search) || 
+                                    (item.patrimonio || "").toString().includes(search);
+                const matchLocal = filterLocal === 'Todos' || item.local === filterLocal;
+                return matchSearch && matchLocal;
+            });
+
+            filtered.sort((a, b) => a.patrimonio - b.patrimonio);
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-4 font-bold text-blue-700">${item.patrimonio}</td>
+                    <td class="px-4 py-4">
+                        <input type="text" class="bg-transparent border-none focus:ring-1 focus:ring-blue-100 rounded w-full" 
+                               value="${item.descricao}" onblur="window.updateField('${item.id}', 'descricao', this.value)">
+                    </td>
+                    <td class="px-4 py-4">
+                        <select class="bg-transparent border-none text-xs p-0 focus:ring-0 cursor-pointer" 
+                                onchange="window.updateField('${item.id}', 'conservacao', this.value)">
+                            <option value="BOM" ${item.conservacao === 'BOM' ? 'selected' : ''}>BOM</option>
+                            <option value="REGULAR" ${item.conservacao === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                            <option value="PRECISA DE REPARO" ${item.conservacao === 'PRECISA DE REPARO' ? 'selected' : ''}>REPARO</option>
+                            <option value="INSERVÍVEL" ${item.conservacao === 'INSERVÍVEL' ? 'selected' : ''}>INSERVÍVEL</option>
+                        </select>
+                    </td>
+                    <td class="px-2 py-4 text-center">
+                        <input type="checkbox" ${item.localizada ? 'checked' : ''} 
+                               class="w-5 h-5 rounded border-slate-300 text-blue-600"
+                               onclick="window.updateField('${item.id}', 'localizada', true)">
+                    </td>
+                    <td class="px-2 py-4 text-center">
+                        <input type="checkbox" ${!item.localizada ? 'checked' : ''} 
+                               class="w-5 h-5 rounded border-slate-300 text-red-600"
+                               onclick="window.updateField('${item.id}', 'localizada', false)">
+                    </td>
+                    <td class="px-4 py-4">
+                        <input type="text" class="bg-transparent border-none focus:ring-1 focus:ring-blue-100 rounded w-full" 
+                               value="${item.local}" onblur="window.updateField('${item.id}', 'local', this.value)">
+                    </td>
+                    <td class="px-4 py-4 text-right no-print">
+                        <button onclick="window.removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function updateFilterOptions() {
+            const select = document.getElementById('filter-local');
+            const locals = [...new Set(inventoryData.map(i => i.local).filter(Boolean))].sort();
+            const currentVal = select.value;
+            select.innerHTML = '<option value="Todos">Todos os Locais</option>' + 
+                locals.map(loc => `<option value="${loc}" ${loc === currentVal ? 'selected' : ''}>${loc}</option>`).join('');
+        }
+
+        window.updateField = async (id, field, value) => {
+            if (!currentUser) return;
+            const docRef = doc(db, ...collPath.split('/'), id);
+            await updateDoc(docRef, { [field]: value });
+        };
+
+        window.removeItem = async (id) => {
+            if (!currentUser || !confirm("Deseja realmente excluir este item?")) return;
+            const docRef = doc(db, ...collPath.split('/'), id);
+            await deleteDoc(docRef);
+        };
+
+        // Lógica de Planilha em Massa (CSV)
+        window.downloadCSVTemplate = () => {
+            const csvContent = "patrimonio;descricao;local;conservacao\n1001;Cadeira Giratória;Recepção;BOM\n1002;Mesa de Escritório;Consultório 01;REGULAR";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "modelo_patrimonio.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        document.getElementById('csv-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file || !currentUser) return;
+
+            const reader = new FileReader();
+            document.getElementById('import-status').classList.remove('hidden');
+
+            reader.onload = async function(event) {
+                const text = event.target.result;
+                const rows = text.split('\n');
+                
+                // Pula o cabeçalho
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i].trim();
+                    if (!row) continue;
+                    
+                    // Suporta separador ; (Excel BR) ou ,
+                    const columns = row.includes(';') ? row.split(';') : row.split(',');
+                    
+                    if (columns.length >= 4) {
+                        try {
+                            await addDoc(collection(db, ...collPath.split('/')), {
+                                patrimonio: Number(columns[0].trim()),
+                                descricao: columns[1].trim(),
+                                local: columns[2].trim(),
+                                conservacao: columns[3].trim().toUpperCase() || 'BOM',
+                                localizada: true,
+                                createdAt: new Date().toISOString()
+                            });
+                        } catch (err) { console.error("Erro na linha " + i, err); }
+                    }
+                }
+                document.getElementById('import-status').classList.add('hidden');
+                alert("Importação concluída!");
+                e.target.value = ''; // limpa input
+            };
+            reader.readAsText(file);
+        });
+
+        // Modal e Forms
+        const modal = document.getElementById('modal-new');
+        document.getElementById('btn-open-modal').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
+
+        document.getElementById('new-item-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            const payload = {
+                patrimonio: Number(document.getElementById('new-patrimonio').value),
+                descricao: document.getElementById('new-descricao').value,
+                local: document.getElementById('new-local').value,
+                conservacao: document.getElementById('new-conservacao').value,
+                localizada: true,
+                createdAt: new Date().toISOString()
+            };
+            try {
+                await addDoc(collection(db, ...collPath.split('/')), payload);
+                modal.classList.add('hidden');
+                e.target.reset();
+            } catch (e) { console.error(e); }
+        };
+
+        document.getElementById('search-input').oninput = updateUI;
+        document.getElementById('filter-local').onchange = updateUI;
+
+    </script>
+</body>
+</html>
