@@ -18,6 +18,19 @@
         .scroll-custom::-webkit-scrollbar { height: 4px; }
         .scroll-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .checked-row { opacity: 0.5; background-color: #f8fafc; }
+        
+        /* Estilo para o select dentro do th */
+        .filter-select {
+            appearance: none;
+            background: transparent;
+            border: none;
+            padding-right: 1.2rem;
+            cursor: pointer;
+            outline: none;
+            color: inherit;
+            font-weight: inherit;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -99,7 +112,18 @@
                     <table class="w-full text-left min-w-[1200px]">
                         <thead>
                             <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b">
-                                <th class="px-4 py-4 text-center">OK</th>
+                                <th class="px-4 py-4 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <span>OK</span>
+                                        <div class="relative flex items-center">
+                                            <select id="filter-ok" class="filter-select no-print">
+                                                <option value="todos">⇅</option>
+                                                <option value="true">✓</option>
+                                                <option value="false">✗</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-4">Património</th>
                                 <th class="px-6 py-4">Descrição</th>
                                 <th class="px-6 py-4">Conservação</th>
@@ -242,11 +266,18 @@
             const tbody = document.getElementById('inventory-table-body');
             const search = document.getElementById('search-input').value.toLowerCase();
             const filterLocal = document.getElementById('filter-local').value;
+            const filterOk = document.getElementById('filter-ok').value;
 
             const filtered = inventoryData.filter(item => {
                 const matchSearch = (item.descricao || "").toLowerCase().includes(search) || (item.patrimonio || "").toString().includes(search);
                 const matchLocal = filterLocal === 'Todos' || item.local === filterLocal;
-                return matchSearch && matchLocal;
+                
+                // Lógica do filtro OK (Checado)
+                let matchOk = true;
+                if (filterOk === 'true') matchOk = item.checado === true;
+                if (filterOk === 'false') matchOk = item.checado === false || !item.hasOwnProperty('checado');
+
+                return matchSearch && matchLocal && matchOk;
             });
 
             filtered.sort((a, b) => (Number(a.patrimonio) || 0) - (Number(b.patrimonio) || 0));
@@ -379,6 +410,7 @@
 
         document.getElementById('search-input').oninput = updateUI;
         document.getElementById('filter-local').onchange = updateUI;
+        document.getElementById('filter-ok').onchange = updateUI;
     </script>
 </body>
 </html>
